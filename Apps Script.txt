@@ -1,0 +1,339 @@
+// ========================================
+// APPS SCRIPT - CADASTRO DE USUÁRIOS
+// VERSÃO CORRIGIDA - SEM ERROS
+// ========================================
+
+// IMPORTANTE: Atualize com o ID da sua planilha
+const PLANILHA_ID = '1gZcFQ6GqtVf_FJkHSkKBVwH9oIYmNmmOuyqEJbzVUqc';
+const ABA_USUARIOS = 'USUARIOS';
+
+// ========================================
+// PROCESSAR REQUISIÇÕES POST
+// ========================================
+function doPost(e) {
+  try {
+    Logger.log('=== INÍCIO doPost ===');
+    
+    // Verificar se e e e.postData existem
+    if (!e || !e.postData || !e.postData.contents) {
+      Logger.log('ERRO: Parâmetros inválidos');
+      Logger.log('Recebido:', JSON.stringify(e));
+      return criarResposta(false, 'Parâmetros de requisição inválidos');
+    }
+    
+    // Parse dos dados recebidos
+    const dadosJSON = e.postData.contents;
+    Logger.log('Dados recebidos (JSON):', dadosJSON);
+    
+    const dados = JSON.parse(dadosJSON);
+    Logger.log('Dados parseados:', JSON.stringify(dados));
+    
+    // Verificar ação solicitada
+    if (dados.acao === 'cadastrar') {
+      Logger.log('Ação: cadastrar usuário');
+      return cadastrarUsuario(dados.dados);
+    }
+    
+    Logger.log('ERRO: Ação não reconhecida:', dados.acao);
+    return criarResposta(false, 'Ação não reconhecida: ' + dados.acao);
+    
+  } catch (erro) {
+    Logger.log('ERRO em doPost:', erro.toString());
+    return criarResposta(false, 'Erro ao processar requisição: ' + erro.toString());
+  }
+}
+
+// ========================================
+// PROCESSAR REQUISIÇÕES GET (para teste)
+// ========================================
+function doGet(e) {
+  return ContentService
+    .createTextOutput('Apps Script CMA está funcionando! Versão: 2.0')
+    .setMimeType(ContentService.MimeType.TEXT);
+}
+
+// ========================================
+// CADASTRAR USUÁRIO
+// ========================================
+function cadastrarUsuario(dados) {
+  try {
+    Logger.log('=== INÍCIO cadastrarUsuario ===');
+    Logger.log('Dados recebidos:', JSON.stringify(dados));
+    
+    // Validar dados obrigatórios
+    if (!dados || !dados.email || !dados.nome) {
+      Logger.log('ERRO: Dados obrigatórios faltando');
+      return criarResposta(false, 'Dados obrigatórios faltando');
+    }
+    
+    // Abrir planilha
+    const ss = SpreadsheetApp.openById(PLANILHA_ID);
+    const sheet = ss.getSheetByName(ABA_USUARIOS);
+    
+    if (!sheet) {
+      Logger.log('ERRO: Planilha USUARIOS não encontrada');
+      return criarResposta(false, 'Planilha USUARIOS não encontrada');
+    }
+    
+    Logger.log('Planilha aberta com sucesso');
+    
+    // Verificar se email já existe
+    const todosOsDados = sheet.getDataRange().getValues();
+    Logger.log('Total de linhas na planilha:', todosOsDados.length);
+    
+    // Pular cabeçalho (linha 0)
+    for (let i = 1; i < todosOsDados.length; i++) {
+      const linha = todosOsDados[i];
+      const emailExistente = String(linha[1]).trim().toLowerCase(); // Coluna B (Email)
+      const emailNovo = String(dados.email).trim().toLowerCase();
+      
+      if (emailExistente === emailNovo) {
+        Logger.log('Email já existe:', emailNovo);
+        return criarResposta(false, 'EMAIL_EXISTE');
+      }
+    }
+    
+    Logger.log('Email disponível, prosseguindo com cadastro');
+    
+    // Adicionar novo usuário
+    const novaLinha = [
+      dados.nome || '',
+      dados.email || '',
+      dados.telefone || '',
+      dados.cargo || '',
+      dados.senha || '',
+      'PENDENTE'  // Status inicial sempre PENDENTE
+    ];
+    
+    Logger.log('Adicionando linha:', JSON.stringify(novaLinha));
+    sheet.appendRow(novaLinha);
+    Logger.log('Usuário cadastrado com sucesso!');
+    
+    // Tentar enviar email de notificação (opcional)
+    try {
+      enviarEmailNotificacao(dados);
+    } catch (erroEmail) {
+      Logger.log('Aviso: Não foi possível enviar email:', erroEmail.toString());
+      // Não falhar o cadastro por causa do email
+    }
+    
+    return criarResposta(true, 'Cadastro realizado com sucesso!');
+    
+  } catch (erro) {
+    Logger.log('ERRO ao cadastrar:', erro.toString());
+    return criarResposta(false, 'Erro ao cadastrar: ' + erro.toString());
+  }
+}
+
+// ========================================
+// ENVIAR EMAIL DE NOTIFICAÇÃO
+// ========================================
+function enviarEmailNotificacao(dados) {
+  const emailAdmin = 'govdocs.digital@gmail.com'; // Altere para o email do admin
+  
+  const assunto = 'Novo Cadastro - Painel do Gestor CMA';
+  
+  const corpo = `
+    Um novo usuário se cadastrou no Painel do Gestor e aguarda aprovação:
+    
+    Nome: ${dados.nome}
+    Email: ${dados.email}
+    Telefone: ${dados.telefone}
+    Cargo: ${dados.cargo}
+    
+    Para aprovar o acesso:
+    1. Abra a planilha: https://docs.google.com/spreadsheets/d/${PLANILHA_ID}
+    2. Vá na aba USUARIOS
+    3. Encontre o usuário com email: ${dados.email}
+    4. Altere o status de PENDENTE para APROVADO
+    
+    Atenciosamente,
+    Sistema Painel do Gestor CMA
+  `;
+  
+  try {
+    MailApp.sendEmail(emailAdmin, assunto, corpo);
+    Logger.log('Email de notificação enviado para:', emailAdmin);
+  } catch (erro) {
+    Logger.log('Erro ao enviar email:', erro.toString());
+    throw erro;
+  }
+}
+
+// ========================================
+// CRIAR RESPOSTA JSON
+// ========================================
+function criarResposta(sucesso, mensagem) {
+  const resposta = {
+    sucesso: sucesso,
+    mensagem: mensagem,
+    timestamp: new Date().toISOString()
+  };
+  
+  Logger.log('Resposta:', JSON.stringify(resposta));
+  
+  return ContentService
+    .createTextOutput(JSON.stringify(resposta))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ========================================
+// FUNÇÃO DE TESTE MANUAL (CORRIGIDA)
+// ========================================
+function testarCadastro() {
+  Logger.log('=== TESTE DE CADASTRO INICIADO ===');
+  
+  const timestamp = new Date().getTime();
+  const emailTeste = 'teste' + timestamp + '@exemplo.com';
+  
+  const dadosUsuario = {
+    nome: 'Usuário Teste ' + timestamp,
+    email: emailTeste,
+    telefone: '(88) 91234-5678',
+    cargo: 'Teste Automático',
+    senha: '123456'
+  };
+  
+  Logger.log('Tentando cadastrar:', JSON.stringify(dadosUsuario));
+  
+  // Chamar diretamente a função de cadastro
+  const resultado = cadastrarUsuario(dadosUsuario);
+  
+  Logger.log('=== RESULTADO DO TESTE ===');
+  Logger.log(resultado.getContent());
+  
+  // Verificar na planilha
+  verificarCadastro(emailTeste);
+}
+
+// ========================================
+// VERIFICAR SE CADASTRO FOI REALIZADO
+// ========================================
+function verificarCadastro(email) {
+  try {
+    const ss = SpreadsheetApp.openById(PLANILHA_ID);
+    const sheet = ss.getSheetByName(ABA_USUARIOS);
+    const dados = sheet.getDataRange().getValues();
+    
+    Logger.log('=== VERIFICANDO CADASTRO ===');
+    
+    for (let i = 1; i < dados.length; i++) {
+      if (String(dados[i][1]).toLowerCase() === email.toLowerCase()) {
+        Logger.log('✅ USUÁRIO ENCONTRADO NA PLANILHA!');
+        Logger.log('Linha ' + (i + 1) + ':', JSON.stringify(dados[i]));
+        return true;
+      }
+    }
+    
+    Logger.log('❌ Usuário NÃO encontrado na planilha');
+    return false;
+    
+  } catch (erro) {
+    Logger.log('Erro ao verificar:', erro.toString());
+    return false;
+  }
+}
+
+// ========================================
+// LISTAR TODOS OS USUÁRIOS
+// ========================================
+function listarUsuarios() {
+  try {
+    const ss = SpreadsheetApp.openById(PLANILHA_ID);
+    const sheet = ss.getSheetByName(ABA_USUARIOS);
+    const usuarios = sheet.getDataRange().getValues();
+    
+    Logger.log('=== USUÁRIOS CADASTRADOS ===');
+    Logger.log('Total: ' + (usuarios.length - 1) + ' usuários');
+    
+    for (let i = 0; i < usuarios.length; i++) {
+      Logger.log('Linha ' + (i + 1) + ':', JSON.stringify(usuarios[i]));
+    }
+    
+  } catch (erro) {
+    Logger.log('Erro ao listar:', erro.toString());
+  }
+}
+
+// ========================================
+// APROVAR USUÁRIO MANUALMENTE
+// ========================================
+function aprovarUsuario(email) {
+  try {
+    const ss = SpreadsheetApp.openById(PLANILHA_ID);
+    const sheet = ss.getSheetByName(ABA_USUARIOS);
+    const usuarios = sheet.getDataRange().getValues();
+    
+    for (let i = 1; i < usuarios.length; i++) {
+      const emailLinha = String(usuarios[i][1]).toLowerCase();
+      const emailBusca = String(email).toLowerCase();
+      
+      if (emailLinha === emailBusca) {
+        sheet.getRange(i + 1, 6).setValue('APROVADO');
+        Logger.log('✅ Usuário aprovado: ' + email);
+        return;
+      }
+    }
+    
+    Logger.log('❌ Usuário não encontrado: ' + email);
+    
+  } catch (erro) {
+    Logger.log('Erro ao aprovar:', erro.toString());
+  }
+}
+
+// ========================================
+// LIMPAR USUÁRIOS DE TESTE
+// ========================================
+function limparUsuariosTeste() {
+  try {
+    const ss = SpreadsheetApp.openById(PLANILHA_ID);
+    const sheet = ss.getSheetByName(ABA_USUARIOS);
+    const dados = sheet.getDataRange().getValues();
+    
+    let removidos = 0;
+    
+    // Percorrer de trás para frente para não afetar os índices
+    for (let i = dados.length - 1; i > 0; i--) {
+      const email = String(dados[i][1]).toLowerCase();
+      
+      if (email.includes('teste') || email.includes('test') || email.includes('@exemplo.com')) {
+        sheet.deleteRow(i + 1);
+        removidos++;
+        Logger.log('Removido:', email);
+      }
+    }
+    
+    Logger.log('=== LIMPEZA CONCLUÍDA ===');
+    Logger.log('Total de usuários de teste removidos:', removidos);
+    
+  } catch (erro) {
+    Logger.log('Erro ao limpar:', erro.toString());
+  }
+}
+
+// ========================================
+// TESTAR CONEXÃO COM A PLANILHA
+// ========================================
+function testarConexao() {
+  try {
+    Logger.log('=== TESTANDO CONEXÃO ===');
+    
+    const ss = SpreadsheetApp.openById(PLANILHA_ID);
+    Logger.log('✅ Planilha encontrada:', ss.getName());
+    
+    const sheet = ss.getSheetByName(ABA_USUARIOS);
+    if (sheet) {
+      Logger.log('✅ Aba USUARIOS encontrada');
+      
+      const dados = sheet.getDataRange().getValues();
+      Logger.log('✅ Total de linhas:', dados.length);
+      Logger.log('✅ Cabeçalho:', JSON.stringify(dados[0]));
+    } else {
+      Logger.log('❌ Aba USUARIOS não encontrada!');
+    }
+    
+  } catch (erro) {
+    Logger.log('❌ Erro ao conectar:', erro.toString());
+  }
+}

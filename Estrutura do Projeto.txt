@@ -1,0 +1,33 @@
+Estrutura do meu Projeto:
+Pasta rais do projeto no meu computador: painel-cma
+painel-cma: (pasta raiz)
+1. =  dist (pasta)
+2. =  node_modules (pasta com varios arquivos dentro)
+3. = public (pasta)
+4. = src (pasta)
+4.1 =  assets (pasta)
+4.2 = components (pasta)
+  4.2.1 = AnaliseFinanceira.jsx
+  4.2.2 = Cadastro.jsx
+  4.2.3 = Cards.jsx
+  4.2.4 = Confirmacao.jsx
+  4.2.5 = Dashboard.jsx
+  4.2.6 = Digitalizacao.jsx
+  4.2.7 = Filtros.jsx
+  4.2.8 = Graficos.jsx
+  4.2.9 = Login.jsx
+  4.2.10 = Tabela.jsx
+4.3 = public (pasta)
+4.4 = services (pasta)
+4.5 = styles (pasta)
+4.6 = App.css 
+4.7 = index.css
+4.8 main.jsx
+5 . .env
+6 . gitignore
+7. eslint.config.js
+8. index.html
+9. package.json
+10. package-lock.json
+11. README.md
+12. vite.config.js

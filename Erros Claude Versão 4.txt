@@ -1,0 +1,22 @@
+1 - Na tela de Cadastro 
+1.1 - Validação de telefone tá restringindo os demais DDD e só aceita DDD (88)
+1.2 - Ao clicar no botão "Solicitar Acesso" Erro: Servidor não respondeu. Verifique a URL do Apps Script no arquivo .env  (obs: eu já atualizei a URL do Apps Script e mesmo assim aparece essa crítica)
+Log de Erro no console: 
+Access to XMLHttpRequest at 'https://script.google.com/macros/s/AKfycbwbggQhQCNEMUGqzxB0xCfrNpr5IS3s_k-GaokkCa5KUJF-vc-nT83aajkyzt2PiYo/exec' from origin 'http://localhost:5173' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+googleSheets.js:52 Erro ao cadastrar via Apps Script: AxiosError: Network Error
+    at XMLHttpRequest.handleError (axios.js?v=566cdfea:1669:19)
+    at Axios.request (axios.js?v=566cdfea:2255:41)
+    at async cadastrarUsuario (googleSheets.js:31:22)
+    at async handleSubmit (Cadastro.jsx:79:25)
+cadastrarUsuario @ googleSheets.js:52Understand this error
+googleSheets.js:66 Nenhuma resposta recebida: XMLHttpRequest
+cadastrarUsuario @ googleSheets.js:66Understand this error
+script.google.com/macros/s/AKfycbwbggQhQCNEMUGqzxB0xCfrNpr5IS3s_k-GaokkCa5KUJF-vc-nT83aajkyzt2PiYo/exec:1  Failed to load resource: net::ERR_FAILEDUnderstand this error
+
+2 - Na Aba Digitalização
+2.1 - Minha base de dados supabase tem 2.911 linhas, porém tá puxando só 1.000 linhas
+2.2 - A combobox Ano aparece os anos de 2022 a 2027, porém na minha base os anos são de 2020 a 2025, e na parte de filtrar ele também não está filtrando nada por ano, os demais filtros estão todos funcionando, menos filtro por ano
+
+3 - Filtros
+3.1 - Quero que inverta a posição na Tela das combobox Mês/Ano para Ano/Mês, primeiro Ano, depois Mês
+
