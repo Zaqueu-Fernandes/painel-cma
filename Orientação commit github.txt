@@ -1,0 +1,19 @@
+O fluxo visual de como as coisas se movem:
+No seu PC: Você altera o código.
+
+git push origin main: Envia as alterações da pasta src para a nuvem (main).
+
+npm run deploy: O seu PC processa o código, cria a pasta dist e envia APENAS o conteúdo dela para a nuvem (gh-pages).
+
+Resumo da ópera:
+Se você mudar algo e der apenas git push, o código no GitHub muda, mas o site continua igual.
+
+Se você mudar algo e der apenas npm run deploy, o site muda, mas se você olhar os arquivos no seu repositório GitHub (na branch main), eles parecerão antigos.
+
+Por isso, o ideal é sempre fazer os dois:
+
+Bash
+git add .
+git commit -m "ajuste no layout do dashboard"
+git push origin main
+npm run deploy
