@@ -12,8 +12,7 @@ Se você mudar algo e der apenas npm run deploy, o site muda, mas se você olhar
 
 Por isso, o ideal é sempre fazer os dois:
 
-Bash
 git add .
-git commit -m "ajuste no layout do dashboard"
-git push origin main
+git commit -m "mensagem da versao"
+git push
 npm run deploy
