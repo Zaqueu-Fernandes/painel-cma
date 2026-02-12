@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
 import Login from './components/Login';
 import Cadastro from './components/Cadastro';
@@ -15,7 +15,7 @@ function App() {
   };
 
   return (
-    <BrowserRouter basename="/painel-cma">
+    <HashRouter>
       <div className="app">
         {/* Header em todas as páginas */}
         <header className="header">
@@ -62,7 +62,7 @@ function App() {
           </p>
         </footer>
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
