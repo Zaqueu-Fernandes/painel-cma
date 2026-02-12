@@ -48,7 +48,7 @@ function Cadastro() {
     if (!formData.telefone.trim()) {
       novosErros.telefone = 'Telefone é obrigatório';
     } else if (!validarTelefone(formData.telefone)) {
-      novosErros.telefone = 'Telefone inválido. Insira o DDD + Número: (XX) 9XXXXXXXX';
+      novosErros.telefone = 'Telefone inválido. Insira o DDD + O Número 9 + seu número (XX)9XXXXXXXX';
     }
 
     if (!formData.cargo.trim()) {

@@ -1,10 +1,9 @@
+//import react from '@vitejs/react-refresh' // Plugin anterior
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react' // Plugin atualizado
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // CORREÇÃO: base com o nome do repositório no GitHub
-  // Troque 'painel-cma' pelo nome EXATO do seu repositório
-  base: '/painel-cma/',
+  base: '/painel-cma/', // Garante que os caminhos dos arquivos fiquem corretos no GitHub Pages
 })
