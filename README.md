@@ -1,4 +1,4 @@
-# React + Vite
+# App com React + Vite + Supabase
 
 📝 Checklist Definitiva: Deploy React + Vite no GitHub Pages
 
