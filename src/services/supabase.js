@@ -22,7 +22,7 @@ export async function cadastrarUsuario(dados) {
       return { sucesso: false, mensagem: 'EMAIL_EXISTE' };
     }
 
-    // Inserir novo usuário com status PENDENTE
+    // Inserir novo usuário com status False
     const { error } = await supabase
       .from('usuarios')
       .insert([{
@@ -31,7 +31,7 @@ export async function cadastrarUsuario(dados) {
         telefone: dados.telefone,
         cargo: dados.cargo,
         senha: dados.senha,
-        status: 'PENDENTE'
+        status: false
       }]);
 
     if (error) throw error;
